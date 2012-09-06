@@ -2,8 +2,8 @@
 
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
-Version: 3.0.14
-Release: 15%{?dist}
+Version: 3.0.17
+Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -34,9 +34,6 @@ Patch20:        rubygem-passenger-3.0.12-spawn-ip.patch
 
 # Honor CXXFLAGS in the environment.
 Patch100:       passenger_apache_fix_autofoo.patch
-
-# Bug in bundled boost. Fixed in passenger 3.0.16
-Patch101:       passenger_boost_xtime.patch
 
 # Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
@@ -164,12 +161,6 @@ rebuilding this package.
 %patch102 -p1 -b .threadtest
 %patch103 -p1 -b .rspec2
 
-%if 0%{?rhel} > 6 || 0%{?fedora} > 17
-pushd ext
-%patch101 -p2 -b .xtime
-popd
-%endif
-
 # remove fastthread checking
 %if 0%{?fedora} >= 17
 %patch104 -p1 -b .fastthread
@@ -276,7 +267,6 @@ find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 # Don't install the installation scripts. That's why we have packaging.
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-apache2-module
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
-%{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-make-enterprisey
 
 # XXX: removing everything in bin until daemon_controller >= 1.0.0
 %{__rm} -rf %{buildroot}%{gem_instdir}/bin
@@ -354,6 +344,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu Sep 6 2012 Brett Lentz <blentz@redhat.com> - 3.0.17-1
+- update to 3.0.17
+
 * Wed Sep 5 2012 Brett Lentz <blentz@redhat.com> - 3.0.14-15
 - add support for tmpfiles.d
 
