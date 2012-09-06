@@ -1,0 +1,55 @@
+diff -ur passenger-3.0.12.orig/ext/common/EventedMessageServer.h passenger-3.0.12/ext/common/EventedMessageServer.h
+--- passenger-3.0.12.orig/ext/common/EventedMessageServer.h	2012-02-03 22:25:43.000000000 +0000
++++ passenger-3.0.12/ext/common/EventedMessageServer.h	2012-04-14 16:13:13.847359596 +0100
+@@ -27,6 +27,7 @@
+ 
+ #include <boost/shared_ptr.hpp>
+ #include <ev++.h>
++#include <sys/types.h>
+ #include <cstdarg>
+ #include <cstdlib>
+ #ifdef HAS_ALLOCA_H_
+diff -ur passenger-3.0.12.orig/ext/common/FileDescriptor.h passenger-3.0.12/ext/common/FileDescriptor.h
+--- passenger-3.0.12.orig/ext/common/FileDescriptor.h	2012-04-13 09:09:57.000000000 +0100
++++ passenger-3.0.12/ext/common/FileDescriptor.h	2012-04-14 16:13:29.610319317 +0100
+@@ -30,6 +30,7 @@
+ #include <oxt/system_calls.hpp>
+ 
+ #include <utility>
++#include <sys/types.h>
+ #include <unistd.h>
+ #include <cerrno>
+ 
+diff -ur passenger-3.0.12.orig/ext/common/StaticString.h passenger-3.0.12/ext/common/StaticString.h
+--- passenger-3.0.12.orig/ext/common/StaticString.h	2012-04-13 09:09:57.000000000 +0100
++++ passenger-3.0.12/ext/common/StaticString.h	2012-04-14 16:12:22.824489975 +0100
+@@ -25,6 +25,7 @@
+ #ifndef _PASSENGER_STATIC_STRING_H_
+ #define _PASSENGER_STATIC_STRING_H_
+ 
++#include <sys/types.h>
+ #include <string>
+ #include <cstring>
+ #include <cstddef>
+diff -ur passenger-3.0.12.orig/ext/common/Utils/BufferedIO.h passenger-3.0.12/ext/common/Utils/BufferedIO.h
+--- passenger-3.0.12.orig/ext/common/Utils/BufferedIO.h	2012-02-03 22:25:44.000000000 +0000
++++ passenger-3.0.12/ext/common/Utils/BufferedIO.h	2012-04-14 16:13:45.767278031 +0100
+@@ -1,6 +1,7 @@
+ #ifndef _PASSENGER_BUFFERED_IO_H_
+ #define _PASSENGER_BUFFERED_IO_H_
+ 
++#include <sys/types.h>
+ #include <string>
+ #include <utility>
+ #include <algorithm>
+diff -ur passenger-3.0.12.orig/ext/common/Utils/StreamBoyerMooreHorspool.h passenger-3.0.12/ext/common/Utils/StreamBoyerMooreHorspool.h
+--- passenger-3.0.12.orig/ext/common/Utils/StreamBoyerMooreHorspool.h	2012-02-03 22:25:44.000000000 +0000
++++ passenger-3.0.12/ext/common/Utils/StreamBoyerMooreHorspool.h	2012-04-14 16:14:09.153218272 +0100
+@@ -190,6 +190,7 @@
+ #endif
+ 
+ 
++#include <sys/types.h>
+ #include <cstddef>
+ #include <cstring>
+ #include <cassert>

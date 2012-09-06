@@ -1,0 +1,51 @@
+diff -ur passenger-3.0.12.orig/bin/passenger-install-nginx-module passenger-3.0.12/bin/passenger-install-nginx-module
+--- passenger-3.0.12.orig/bin/passenger-install-nginx-module	2012-04-13 09:09:57.000000000 +0100
++++ passenger-3.0.12/bin/passenger-install-nginx-module	2012-04-14 18:33:41.906096758 +0100
+@@ -87,7 +87,7 @@
+ 		else
+ 			nginx_source_dir = ask_for_nginx_source_dir
+ 			nginx_prefix = ask_for_nginx_install_prefix
+-			extra_nginx_configure_flags = ask_for_extra_nginx_configure_flags(nginx_prefix)
++            extra_nginx_configure_flags = ENV['NGINX_EXTRA_CONFIGURE_FLAGS}']
+ 		end
+ 		check_whether_we_can_write_to(nginx_prefix) || exit(1)
+ 		nginx_config_already_exists_before_installing = nginx_config_exists?(nginx_prefix)
+@@ -303,8 +303,6 @@
+ 	end
+ 	
+ 	def check_whether_we_can_write_to(dir)
+-		FileUtils.mkdir_p(dir)
+-		File.new("#{dir}/__test__.txt", "w").close
+ 		return true
+ 	rescue
+ 		new_screen
+@@ -327,8 +325,7 @@
+ 			new_screen
+ 			color_puts "<banner>Compiling and installing Nginx...</banner>"
+ 			if !sh(build_nginx_configure_command(prefix, extra_configure_flags)) ||
+-			   !sh("make") ||
+-			   !sh("make install")
++			   !sh("make")
+ 				return false
+ 			end
+ 		end
+@@ -390,16 +387,9 @@
+ 	end
+ 	
+ 	def build_nginx_configure_command(prefix, extra_configure_flags = nil)
+-		command = "sh ./configure --prefix='#{prefix}' "
+-		command << "--with-http_ssl_module "
+-		command << "--with-http_gzip_static_module "
+-		command << "--with-cc-opt='-Wno-error' "
+-		if @pcre_source_dir
+-			command << "--with-pcre='#{@pcre_source_dir}' "
+-		elsif !pcre_is_installed?
+-			command << "--without-http_rewrite_module "
+-		end
+-		command << "--add-module='#{SOURCE_ROOT}/ext/nginx' #{extra_configure_flags}"
++		command = "sh ./configure "
++		command << "--add-module='#{SOURCE_ROOT}/ext/nginx' "
++        command << ENV['NGINX_EXTRA_CONFIGURE_FLAGS']
+ 		command.strip!
+ 		return command
+ 	end

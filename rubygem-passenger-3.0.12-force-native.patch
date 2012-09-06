@@ -1,0 +1,81 @@
+diff --git a/ext/common/ResourceLocator.h b/ext/common/ResourceLocator.h
+index ae75261..a445ad0 100644
+--- a/ext/common/ResourceLocator.h
++++ b/ext/common/ResourceLocator.h
+@@ -65,13 +65,13 @@ public:
+ 				!fileExists(root + "/DEVELOPERS.TXT");
+ 			
+ 			if (nativelyPackaged) {
+-				agentsDir           = "/usr/lib/phusion-passenger/agents";
+-				helperScriptsDir    = "/usr/share/phusion-passenger/helper-scripts";
+-				resourcesDir        = "/usr/share/phusion-passenger";
+-				docDir              = "/usr/share/doc/phusion-passenger";
++				agentsDir           = "%%AGENTS_DIR%%";
++				helperScriptsDir    = "%%GEM_INSTALL_DIR%%/helper-scripts";
++				resourcesDir        = "%%GEM_INSTALL_DIR%%";
++				docDir              = "%%GEM_INSTALL_DIR%%/doc";
+ 				rubyLibDir          = "";
+-				compilableSourceDir = "/usr/share/phusion-passenger/compilable-source";
+-				apache2Module       = "/usr/lib/apache2/modules/mod_passenger.so";
++				compilableSourceDir = "%%GEM_INSTALL_DIR%%";
++				apache2Module       = "%%APACHE_INSTALLED_MOD%%";
+ 			} else {
+ 				agentsDir           = root + "/agents";
+ 				helperScriptsDir    = root + "/helper-scripts";
+diff --git a/lib/phusion_passenger.rb b/lib/phusion_passenger.rb
+index 28265df..d9a3c40 100644
+--- a/lib/phusion_passenger.rb
++++ b/lib/phusion_passenger.rb
+@@ -39,11 +39,11 @@ module PhusionPassenger
+ 	# using the OS's native package management system, i.e. as opposed
+ 	# to being installed from source or with RubyGems.
+ 	def self.natively_packaged?
+-		if !defined?(@natively_packaged)
+-			@natively_packaged = !File.exist?("#{LIBDIR}/../Rakefile") ||
+-			                     !File.exist?("#{LIBDIR}/../DEVELOPERS.TXT")
+-		end
+-		return @natively_packaged
++               if !defined?(@natively_packaged)
++                       @natively_packaged = !File.exist?("#{LIBDIR}/../Rakefile") ||
++                                            !File.exist?("#{LIBDIR}/../DEVELOPERS.TXT")
++               end
++               return @natively_packaged
+ 	end
+ 	
+ 	NATIVELY_PACKAGED_SOURCE_ROOT        = "/usr/share/phusion-passenger/source"
+@@ -94,12 +94,13 @@ module PhusionPassenger
+ 		# Not available when natively packaged.
+ 		NATIVE_SUPPORT_DIR = File.join(SOURCE_ROOT, "ext", "ruby")
+ 	else
+-		SOURCE_ROOT        = NATIVELY_PACKAGED_SOURCE_ROOT
+-		DOCDIR             = NATIVELY_PACKAGED_DOCDIR
+-		RESOURCES_DIR      = NATIVELY_PACKAGED_RESOURCES_DIR
+-		AGENTS_DIR         = NATIVELY_PACKAGED_AGENTS_DIR
+-		HELPER_SCRIPTS_DIR = NATIVELY_PACKAGED_HELPER_SCRIPTS_DIR
+-		APACHE2_MODULE     = NATIVELY_PACKAGED_APACHE2_MODULE
++		SOURCE_ROOT        = '%%GEM_INSTALL_DIR%%'
++		DOCDIR             = "#{SOURCE_ROOT}/doc"
++		RESOURCES_DIR      = "#{SOURCE_ROOT}/resources"
++		AGENTS_DIR         = '%%AGENTS_DIR%%'
++		HELPER_SCRIPTS_DIR = "#{SOURCE_ROOT}/helper-scripts"
++		APACHE2_MODULE     = '%%APACHE_INSTALLED_MOD%%'
++		NATIVE_SUPPORT_DIR = "%%NATIVE_SUPPORT_DIR%%"
+ 	end
+ 	
+ 	
+diff --git a/lib/phusion_passenger/native_support.rb b/lib/phusion_passenger/native_support.rb
+index f1edf1c..4312d01 100644
+--- a/lib/phusion_passenger/native_support.rb
++++ b/lib/phusion_passenger/native_support.rb
+@@ -38,10 +38,7 @@ class NativeSupportLoader
+ 
+ private
+ 	def archdir
+-		@archdir ||= begin
+-			require 'phusion_passenger/platform_info/binary_compatibility'
+-			PlatformInfo.ruby_extension_binary_compatibility_ids.join("-")
+-		end
++		@archdir ||= 'native'
+ 	end
+ 	
+ 	def libext

@@ -1,0 +1,36 @@
+diff --git a/build/packaging.rb b/build/packaging.rb
+index aa63b56..25c934a 100644
+--- a/build/packaging.rb
++++ b/build/packaging.rb
+@@ -41,8 +41,7 @@ spec = Gem::Specification.new do |s|
+ 	s.email = "info@phusion.nl"
+ 	s.require_paths = ["lib"]
+ 	s.add_dependency 'rake', '>= 0.8.1'
+-	s.add_dependency 'fastthread', '>= 1.0.1'
+-	s.add_dependency 'daemon_controller', '>= 1.0.0'
++	s.add_dependency 'daemon_controller', '>= 0.2.5'
+ 	s.add_dependency 'rack'
+ 	s.files = FileList[*Packaging::GLOB] - FileList[*Packaging::EXCLUDE_GLOB]
+ 	s.executables = Packaging::USER_EXECUTABLES + Packaging::SUPER_USER_EXECUTABLES
+diff --git a/lib/phusion_passenger/dependencies.rb b/lib/phusion_passenger/dependencies.rb
+index e37a212..f39e8ff 100644
+--- a/lib/phusion_passenger/dependencies.rb
++++ b/lib/phusion_passenger/dependencies.rb
+@@ -578,7 +578,7 @@ module Dependencies # :nodoc: all
+ 	end
+ 	
+ 	Daemon_Controller = Dependency.new do |dep|
+-		dep.name = "daemon_controller >= 1.0.0"
++		dep.name = "daemon_controller >= 0.2.5"
+ 		dep.install_instructions = "Please install RubyGems first, then run " <<
+ 			"<b>#{PlatformInfo.gem_command || "gem"} install daemon_controller</b>"
+ 		dep.define_checker do |result|
+@@ -590,7 +590,7 @@ module Dependencies # :nodoc: all
+ 				require 'daemon_controller'
+ 				begin
+ 					require 'daemon_controller/version'
+-					too_old = DaemonController::VERSION_STRING < '1.0.0'
++					too_old = DaemonController::VERSION_STRING < '0.2.5'
+ 				rescue LoadError
+ 					too_old = true
+ 				end
