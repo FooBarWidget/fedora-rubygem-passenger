@@ -10,7 +10,7 @@ Group: System Environment/Daemons
 # BCrypt and Blowfish files use BSD license.
 # Documentation is CC-BY-SA
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=470696#c146
-License: Boost 1.0 and BSD and BSD with advertising and MIT and zlib
+License: Boost and BSD and BSD with advertising and MIT and zlib
 
 URL: http://www.modrails.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -102,7 +102,7 @@ BuildRequires:  httpd-devel
 Requires: httpd >= 2.2
 Requires: rubygem(%{gem_name}) = %{version}-%{release}
 Requires: %{name}-native%{?_isa} = %{version}-%{release}
-License: Boost 1.0 and BSD and BSD with advertising and MIT and zlib
+License: Boost and BSD and BSD with advertising and MIT and zlib
 
 %description -n mod_passenger
 This package contains the pluggable Apache server module for Phusion Passenger™.
@@ -112,7 +112,7 @@ Summary: Apache Module for Phusion Passenger
 Group: System Environment/Daemons
 Requires: rubygem(%{gem_name}) = %{version}-%{release}
 Provides: bundled(boost-devel) =  1.44
-License: Boost 1.0 and BSD and BSD with advertising and GPL+ and MIT and zlib
+License: Boost and BSD and BSD with advertising and GPL+ and MIT and zlib
 
 %description devel
 This package contains development files for Phusion Passenger™.
@@ -133,7 +133,7 @@ Group: System Environment/Daemons
 Requires: rubygem(%{gem_name}) = %{version}-%{release}
 Requires: %{name}-native-libs%{?_isa} = %{version}-%{release}
 Requires: %{name}%{?_isa} = %{version}-%{release}
-License: Boost 1.0 and BSD and BSD with advertising and MIT and zlib
+License: Boost and BSD and BSD with advertising and MIT and zlib
 %description native
 This package contains the native code extensions for Apache & Nginx
 Phusion Passenger™ bindings.
@@ -143,7 +143,7 @@ Summary: Phusion Passenger native extensions
 Group: System Environment/Daemons
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: ruby
-License: Boost 1.0 and BSD and BSD with advertising and MIT and zlib
+License: Boost and BSD and BSD with advertising and MIT and zlib
 %description native-libs
 This package contains the native shared library for Apache & Nginx
 Phusion Passenger™ bindings, built against ruby sources. It has been
@@ -344,6 +344,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Fri Sep 7 2012 Brett Lentz <blentz@redhat.com> - 3.0.17-2
+- Fix License
+
 * Thu Sep 6 2012 Brett Lentz <blentz@redhat.com> - 3.0.17-1
 - update to 3.0.17
 
