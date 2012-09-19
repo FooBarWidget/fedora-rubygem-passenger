@@ -3,7 +3,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.17
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -52,7 +52,6 @@ Patch104:       passenger_fixdeps.patch
 Requires: rubygems
 # XXX: Needed to run passenger standalone
 # Requires: rubygem(daemon_controller) >= 1.0.0
-Requires: rubygem(file-tail)
 Requires: rubygem(rack)
 Requires: rubygem(rake)
 Requires: ruby(abi) = 1.9.1
@@ -344,6 +343,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Wed Sep 19 2012 Orion Poplawski <orion@cora.nwra.com> - 3.0.17-3
+- Drop dependency on rubygem(file-tail), no longer needed
+
 * Fri Sep 7 2012 Brett Lentz <blentz@redhat.com> - 3.0.17-2
 - Fix License
 
