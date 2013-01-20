@@ -329,8 +329,8 @@ rake test --trace ||:
 
 %files -n mod_passenger
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/passenger.conf
-%doc doc/Users\ guide\ Apache.html
-%doc doc/Users\ guide\ Apache.txt
+%doc 'doc/Users guide Apache.html'
+%doc 'doc/Users guide Apache.txt'
 %{_libdir}/httpd/modules/mod_passenger.so
 
 %files native
