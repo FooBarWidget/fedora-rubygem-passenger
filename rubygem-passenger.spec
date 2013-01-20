@@ -428,5 +428,5 @@ rake test --trace ||:
 - Update to 3.0.12
 - Incorporate specfile changes from kanarip's version
 
-* Wed Apr 12 2012 Brett Lentz <blentz@redhat.com> - 3.0.11-1
+* Wed Apr 11 2012 Brett Lentz <blentz@redhat.com> - 3.0.11-1
 - Initial spec file
