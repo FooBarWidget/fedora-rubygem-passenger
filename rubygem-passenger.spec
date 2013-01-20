@@ -2,8 +2,8 @@
 
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
-Version: 3.0.17
-Release: 3%{?dist}
+Version: 3.0.19
+Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -15,7 +15,7 @@ License: Boost and BSD and BSD with advertising and MIT and zlib
 URL: http://www.modrails.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Source: http://rubyforge.org/frs/download.php/76329/%{gem_name}-%{version}.tar.gz
+Source: https://github.com/FooBarWidget/passenger/archive/release-%{version}.tar.gz
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
 Source10: apache-passenger.conf.in
@@ -151,7 +151,7 @@ rebuilding this package.
 
 
 %prep
-%setup -q -n %{gem_name}-%{version}
+%setup -q -n %{gem_name}-release-%{version}
 
 %patch1   -p1 -b .force-native
 %patch2   -p1 -b .include-sys-types
@@ -343,6 +343,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Sun Jan 20 2013 Orion Poplawski <orion@cora.nwra.com> - 3.0.19-1
+- Update to 3.0.19
+
 * Wed Sep 19 2012 Orion Poplawski <orion@cora.nwra.com> - 3.0.17-3
 - Drop dependency on rubygem(file-tail), no longer needed
 
