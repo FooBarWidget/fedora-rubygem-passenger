@@ -311,7 +311,6 @@ rake test --trace ||:
 %endif
 %exclude %{gem_instdir}/configure
 %exclude %{gem_instdir}/debian/
-%exclude %{gem_instdir}/.yardoc
 %exclude %{gem_cache}
 
 %files doc
