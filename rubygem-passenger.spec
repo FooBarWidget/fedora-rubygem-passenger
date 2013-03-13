@@ -88,7 +88,7 @@ BuildRequires: rubygem(rake) >= 0.8.1
 BuildRequires: rubygem(rack)
 BuildRequires: rubygem(rspec)
 BuildRequires: rubygem(mime-types)
-BuildRequires: rubygem(bundler)
+BuildRequires: rubygem(builder)
 BuildRequires: source-highlight
 
 # XXX
@@ -352,7 +352,7 @@ rake test --trace ||:
 %changelog
 * Wed Mar 13 2013 Troy Dawson <tdawson@redhat.com> - 3.0.19-3
 - Fix to make it build/install on F19+
-- Added BuildRequires: rubygem(bundler)
+- Added BuildRequires: rubygem(builder)
 
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.19-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
