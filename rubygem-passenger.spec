@@ -1,9 +1,13 @@
 %global gem_name passenger
 
+%if 0%{?fedora} >= 19
+%global gem_extdir %{gem_extdir_mri}
+%endif
+
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.19
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -54,7 +58,11 @@ Requires: rubygems
 # Requires: rubygem(daemon_controller) >= 1.0.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
+%if 0%{?fedora} >= 19
+Requires: ruby(release)
+%else
 Requires: ruby(abi) = 1.9.1
+%endif
 
 %if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
 BuildRequires:  libcurl-devel
@@ -341,6 +349,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Wed Mar 13 2013 Troy Dawson <tdawson@redhat.com> - 3.0.19-3
+- Fix to make it build/install on F19+
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.19-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
