@@ -49,6 +49,11 @@ Patch103:       passenger_rspec2_helper.patch
 # Remove checking for fastthread on F17+
 Patch104:       passenger_fixdeps.patch
 
+# Fix gem-requires for ruby2
+# This is a hack until we move to passenger 4.x
+# https://github.com/FooBarWidget/passenger/pull/71
+Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
+
 # removes -Werror in upstream build scripts.  -Werror conflicts with
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 #Patch200:       nginx-auto-cc-gcc.patch
@@ -88,7 +93,6 @@ BuildRequires: rubygem(rake) >= 0.8.1
 BuildRequires: rubygem(rack)
 BuildRequires: rubygem(rspec)
 BuildRequires: rubygem(mime-types)
-BuildRequires: rubygem(builder)
 BuildRequires: source-highlight
 
 # XXX
@@ -172,6 +176,11 @@ rebuilding this package.
 # remove fastthread checking
 %if 0%{?fedora} >= 17
 %patch104 -p1 -b .fastthread
+%endif
+
+# fix requires for ruby2
+%if 0%{?fedora} >= 19
+%patch105 -p1 -b .requires
 %endif
 
 # Don't use bundled libev
@@ -352,7 +361,7 @@ rake test --trace ||:
 %changelog
 * Wed Mar 13 2013 Troy Dawson <tdawson@redhat.com> - 3.0.19-3
 - Fix to make it build/install on F19+
-- Added BuildRequires: rubygem(builder)
+- Added patch105
 
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.19-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
