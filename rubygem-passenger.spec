@@ -6,8 +6,8 @@
 
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
-Version: 3.0.19
-Release: 4%{?dist}
+Version: 3.0.21
+Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -359,6 +359,10 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu May 30 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-1
+- Update to version 3.0.21
+- Fix for CVE-2013-2119
+
 * Thu May 16 2013 Troy Dawson <tdawson@redhat.com> - 3.0.19-4
 - Fix to make agents work on F19+
 
