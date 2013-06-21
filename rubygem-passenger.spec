@@ -7,7 +7,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -281,9 +281,10 @@ install -m 0755 ext/ruby/ruby*linux/passenger_native_support.so %{buildroot}%{ge
 # Remove zero-length files
 find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 
-# Don't install the installation scripts. That's why we have packaging.
+# Don't install the installation scripts and Rakefile. That's why we have packaging.
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-apache2-module
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
+%{__rm} %{buildroot}%{gem_instdir}/Rakefile
 
 # XXX: removing everything in bin until daemon_controller >= 1.0.0
 %{__rm} -rf %{buildroot}%{gem_instdir}/bin
@@ -338,7 +339,6 @@ rake test --trace ||:
 %files devel
 %doc %{gem_instdir}/INSTALL
 %doc %{gem_instdir}/PACKAGING.TXT
-%{gem_instdir}/Rakefile
 %{gem_instdir}/test
 %{gem_instdir}/build
 %{gem_instdir}/dev
@@ -359,6 +359,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Fri Jun 21 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-2
+- Remove Rakefile (only used for building) (#976843)
+
 * Thu May 30 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-1
 - Update to version 3.0.21
 - Fix for CVE-2013-2119
