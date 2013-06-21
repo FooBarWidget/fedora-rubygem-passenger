@@ -7,7 +7,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -193,7 +193,7 @@ rebuilding this package.
 %{__sed} -i \
     -e 's|%%%%GEM_INSTALL_DIR%%%%|%{gem_instdir}|g' \
     -e 's|%%%%APACHE_INSTALLED_MOD%%%%|%{_libdir}/httpd/modules/|g' \
-    -e 's|%%%%AGENTS_DIR%%%%|%{gem_instdir}/agents|g' \
+    -e 's|%%%%AGENTS_DIR%%%%|%{gem_extdir}/agents|g' \
     -e 's|%%%%NATIVE_SUPPORT_DIR%%%%|%{gem_extdir}/lib|g' \
     lib/phusion_passenger.rb \
     lib/phusion_passenger/native_support.rb \
@@ -249,8 +249,8 @@ rmdir %{buildroot}%{gem_instdir}/man
 
 # The agents aren't in the gem for some reason...
 %{__chmod} -R 0755 agents/*
-%{__mkdir_p} %{buildroot}%{gem_instdir}
-%{__cp} -a agents %{buildroot}%{gem_instdir}
+%{__mkdir_p} %{buildroot}%{gem_extdir}
+%{__cp} -a agents %{buildroot}%{gem_extdir}
 
 # Make our ghost log and run directories...
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
@@ -350,7 +350,7 @@ rake test --trace ||:
 %{_libdir}/httpd/modules/mod_passenger.so
 
 %files native
-%{gem_instdir}/agents
+%{gem_extdir}/agents
 %dir %{_localstatedir}/log/passenger-analytics
 %{_sysconfdir}/logrotate.d/passenger
 
@@ -359,6 +359,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Fri Jun 21 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-3
+- Putting the agents back to where they originally were
+
 * Fri Jun 21 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-2
 - Remove Rakefile (only used for building) (#976843)
 
