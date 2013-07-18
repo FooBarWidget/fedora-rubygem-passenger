@@ -7,7 +7,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -54,9 +54,12 @@ Patch104:       passenger_fixdeps.patch
 # https://github.com/FooBarWidget/passenger/pull/71
 Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
 
-# removes -Werror in upstream build scripts.  -Werror conflicts with
-# -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
-#Patch200:       nginx-auto-cc-gcc.patch
+# Fix for CVE-2013-4136
+# https://bugzilla.redhat.com/show_bug.cgi?id=985634
+# Note: This is a combination of both
+# https://github.com/phusion/passenger/commit/5483b3292cc2af1c83033eaaadec20dba4dcfd9b
+# https://github.com/phusion/passenger/commit/9dda49f4a3ebe9bafc48da1bd45799f30ce19566
+Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
@@ -182,6 +185,7 @@ rebuilding this package.
 %if 0%{?fedora} >= 19
 %patch105 -p1 -b .requires
 %endif
+%patch106 -p1 -b .tmpdir
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
@@ -359,6 +363,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu Jul 18 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-4
+- Fix for CVE-2013-4136 (#985634)
+
 * Fri Jun 21 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-3
 - Putting the agents back to where they originally were
 
