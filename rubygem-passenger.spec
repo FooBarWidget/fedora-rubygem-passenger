@@ -7,7 +7,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 4%{?dist}
+Release: 5%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -363,6 +363,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.21-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Thu Jul 18 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-4
 - Fix for CVE-2013-4136 (#985634)
 
