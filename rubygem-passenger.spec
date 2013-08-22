@@ -63,7 +63,7 @@ Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
-# Requires: rubygem(daemon_controller) >= 1.0.0
+Requires: rubygem(daemon_controller) >= 1.0.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
 %if 0%{?fedora} >= 19
@@ -290,9 +290,6 @@ find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
 %{__rm} %{buildroot}%{gem_instdir}/Rakefile
 
-# XXX: removing everything in bin until daemon_controller >= 1.0.0
-%{__rm} -rf %{buildroot}%{gem_instdir}/bin
-
 %check
 export USE_VENDORED_LIBEV=false
 # Run the tests, capture the output, but don't fail the build if the tests fail
@@ -319,8 +316,7 @@ rake test --trace ||:
 %{gem_cache}
 %{gem_spec}
 %dir %{gem_instdir}
-# XXX: removing everything in bin until daemon_controller >= 1.0.0
-#%{gem_instdir}/bin
+%{gem_instdir}/bin
 %{gem_instdir}/helper-scripts
 %{gem_instdir}/lib
 %{gem_instdir}/resources
@@ -363,6 +359,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu Aug 22 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-5
+- bz#999384
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.21-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
