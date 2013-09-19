@@ -7,7 +7,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 5%{?dist}
+Release: 6%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -61,13 +61,16 @@ Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
 # https://github.com/phusion/passenger/commit/9dda49f4a3ebe9bafc48da1bd45799f30ce19566
 Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=985634
+Patch107:       rubygem-passenger-3.0.21-GLIBC_HAVE_LONG_LONG.patch
+
 Requires: rubygems
 # XXX: Needed to run passenger standalone
-Requires: rubygem(daemon_controller) >= 1.0.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
 %if 0%{?fedora} >= 19
 Requires: ruby(release)
+Requires: rubygem(daemon_controller) >= 1.0.0
 %else
 Requires: ruby(abi) = 1.9.1
 %endif
@@ -84,6 +87,7 @@ BuildRequires:  rubygem(fastthread) >= 1.0.1
 %endif
 
 BuildRequires: asciidoc
+BuildRequires: boost-devel
 BuildRequires: doxygen
 BuildRequires: graphviz
 BuildRequires: httpd-devel
@@ -186,6 +190,10 @@ rebuilding this package.
 %patch105 -p1 -b .requires
 %endif
 %patch106 -p1 -b .tmpdir
+# fix passenger boost for glibc >= 2.18
+%if 0%{?fedora} >= 20
+%patch107 -p1 -b .glibc-long
+%endif
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
@@ -290,6 +298,11 @@ find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
 %{__rm} %{buildroot}%{gem_instdir}/Rakefile
 
+# XXX: removing everything in bin until daemon_controller >= 1.0.0
+%if 0%{?fedora} < 19
+%{__rm} -rf %{buildroot}%{gem_instdir}/bin
+%endif
+
 %check
 export USE_VENDORED_LIBEV=false
 # Run the tests, capture the output, but don't fail the build if the tests fail
@@ -316,7 +329,10 @@ rake test --trace ||:
 %{gem_cache}
 %{gem_spec}
 %dir %{gem_instdir}
+# removing everything in bin until daemon_controller >= 1.0.0
+%if 0%{?fedora} >= 19
 %{gem_instdir}/bin
+%endif
 %{gem_instdir}/helper-scripts
 %{gem_instdir}/lib
 %{gem_instdir}/resources
@@ -359,8 +375,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
-* Thu Aug 22 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-5
-- bz#999384
+* Thu Sep 19 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-6
+- Fix for F20 FTBFS (#993310)
+- Start using _bindir for >= f19 (#999384) - Brett Lentz
 
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.21-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
