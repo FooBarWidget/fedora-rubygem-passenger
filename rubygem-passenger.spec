@@ -4,10 +4,16 @@
 %global gem_extdir %{gem_extdir_mri}
 %endif
 
+%{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo missing-httpd-devel)}}
+%{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
+# /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
+%{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
+%{!?_httpd_moddir:    %{expand: %%global _httpd_moddir    %%{_libdir}/httpd/modules}}
+
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 7%{?dist}
+Release: 8%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -118,7 +124,7 @@ Rails conventions, such as “Don’t-Repeat-Yourself”.
 Summary: Apache Module for Phusion Passenger
 Group: System Environment/Daemons
 BuildRequires:  httpd-devel
-Requires: httpd >= 2.2
+Requires: httpd-mmn = %{_httpd_mmn}
 Requires: rubygem(%{gem_name}) = %{version}-%{release}
 Requires: %{name}-native%{?_isa} = %{version}-%{release}
 License: Boost and BSD and BSD with advertising and MIT and zlib
@@ -204,7 +210,7 @@ rebuilding this package.
 # fix up install paths
 %{__sed} -i \
     -e 's|%%%%GEM_INSTALL_DIR%%%%|%{gem_instdir}|g' \
-    -e 's|%%%%APACHE_INSTALLED_MOD%%%%|%{_libdir}/httpd/modules/|g' \
+    -e 's|%%%%APACHE_INSTALLED_MOD%%%%|%{_httpd_moddir}|g' \
     -e 's|%%%%AGENTS_DIR%%%%|%{gem_extdir}/agents|g' \
     -e 's|%%%%NATIVE_SUPPORT_DIR%%%%|%{gem_extdir}/lib|g' \
     lib/phusion_passenger.rb \
@@ -244,13 +250,21 @@ gem install -V \
             pkg/%{gem_name}-%{version}.gem
 
 # Install Apache module.
-%{__mkdir_p} %{buildroot}/%{_libdir}/httpd/modules
-install -pm 0755 ext/apache2/mod_passenger.so %{buildroot}/%{_libdir}/httpd/modules
+%{__mkdir_p} %{buildroot}/%{_httpd_moddir}
+install -pm 0755 ext/apache2/mod_passenger.so %{buildroot}/%{_httpd_moddir}
 
 # Install Apache config.
-%{__mkdir_p} %{buildroot}/%{_sysconfdir}/httpd/conf.d
-install -pm 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/httpd/conf.d/passenger.conf
-%{__sed} -i -e 's|@PASSENGERROOT@|%{gem_instdir}|g' %{buildroot}/%{_sysconfdir}/httpd/conf.d/passenger.conf
+%{__mkdir_p} %{buildroot}%{_httpd_confdir} %{buildroot}%{_httpd_modconfdir}
+%{__sed} -e 's|@PASSENGERROOT@|%{gem_instdir}|g' %{SOURCE10} > passenger.conf
+
+%if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
+%{__sed} -n /^LoadModule/p passenger.conf > 10-passenger.conf
+%{__sed} -i /^LoadModule/d passenger.conf
+touch -r %{SOURCE10} 10-passenger.conf
+install -pm 0644 10-passenger.conf %{buildroot}%{_httpd_modconfdir}/passenger.conf
+%endif
+touch -r %{SOURCE10} passenger.conf
+install -pm 0644 passenger.conf %{buildroot}%{_httpd_confdir}/passenger.conf
 
 # Install man pages into the proper location.
 %{__mkdir_p} %{buildroot}%{_mandir}/man1
@@ -353,9 +367,12 @@ rake test --trace ||:
 %{gem_instdir}/ext
 
 %files -n mod_passenger
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/passenger.conf
+%config(noreplace) %{_httpd_modconfdir}/*.conf
+%if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
+%config(noreplace) %{_httpd_confdir}/*.conf
+%endif
 %doc doc/Users?guide?Apache.txt
-%{_libdir}/httpd/modules/mod_passenger.so
+%{_httpd_moddir}/mod_passenger.so
 
 %files native
 %{gem_extdir}/agents
@@ -367,6 +384,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Fri Sep 20 2013 Joe Orton <jorton@redhat.com> - 3.0.21-8
+- update packaging for httpd 2.4.x
+
 * Thu Sep 19 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-7
 - Fix for F20 FTBFS (#993310)
 
