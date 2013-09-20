@@ -244,7 +244,7 @@ export USE_VENDORED_LIBEV=false
 gem install -V \
             --local \
             --install-dir %{buildroot}%{gem_dir} \
-            --bindir %{buildroot}%{gem_instdir}/bin \
+            --bindir %{buildroot}%{_bindir} \
             --force \
             --rdoc \
             pkg/%{gem_name}-%{version}.gem
@@ -310,6 +310,8 @@ find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 # Don't install the installation scripts and Rakefile. That's why we have packaging.
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-apache2-module
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
+%{__rm} %{buildroot}%{_bindir}/%{gem_name}-install-apache2-module
+%{__rm} %{buildroot}%{_bindir}/%{gem_name}-install-nginx-module
 %{__rm} %{buildroot}%{gem_instdir}/Rakefile
 
 %check
@@ -342,6 +344,7 @@ rake test --trace ||:
 %{gem_instdir}/helper-scripts
 %{gem_instdir}/lib
 %{gem_instdir}/resources
+%{_bindir}/%{gem_name}*
 %{_mandir}/man1/%{gem_name}-*
 %{_mandir}/man8/%{gem_name}-*
 %if 0%{?fedora} > 15
