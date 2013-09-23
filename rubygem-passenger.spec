@@ -13,7 +13,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 3.0.21
-Release: 8%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -387,14 +387,17 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Mon Sep 23 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-9
+- finish fixing bz#999384
+
 * Fri Sep 20 2013 Joe Orton <jorton@redhat.com> - 3.0.21-8
 - update packaging for httpd 2.4.x
 
 * Thu Sep 19 2013 Troy Dawson <tdawson@redhat.com> - 3.0.21-7
 - Fix for F20 FTBFS (#993310)
 
--* Thu Aug 22 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-6
--- bz#999384
+* Thu Aug 22 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-6
+- bz#999384
 
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.0.21-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
