@@ -12,8 +12,8 @@
 
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
-Version: 3.0.21
-Release: 9%{?dist}
+Version: 4.0.18
+Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -31,44 +31,60 @@ Source2: rubygem-passenger.tmpfiles
 Source10: apache-passenger.conf.in
 #Source20: nginx-passenger.conf.in
 
+## Native support was completely rewritten
+## Patch no longer needed
 # Get passenger to recognize our path preferences
-Patch1:         rubygem-passenger-3.0.12-force-native.patch
+#Patch1:         rubygem-passenger-3.0.12-force-native.patch
 
 # Include sys/types.h for GCC 4.7
-Patch2:         rubygem-passenger-3.0.14-gcc47-include-sys_types.patch
+Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
+
+## Not needed, use SKIP_SIGNING=1 instead
+# Remove signing gems with GPG, requires rubygem-openpgp >= 0.3.0
+#Patch3:        passenger_do_not_sign_gem.patch
+
+# Make example config for tests ready for linux by default
+Patch4:        passenger_tests_default_config_example.patch
 
 #Patch10:        rubygem-passenger-3.0.12-spoof-nginx-install.patch
 
-# Support spawnIpAddress option to allow binding to a particular IP.
-Patch20:        rubygem-passenger-3.0.12-spawn-ip.patch
+## SpawnIP was redone on passenger 4
+## Support spawnIpAddress option to allow binding to a particular IP.
+#Patch20:        rubygem-passenger-3.0.12-spawn-ip.patch
 
 # Honor CXXFLAGS in the environment.
-Patch100:       passenger_apache_fix_autofoo.patch
+Patch100:       rubygem-passenger-4.0.18_apache_fix_autofoo.patch
 
 # Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
 Patch102:       passenger_dynamic_thread_group.patch
 
+## No longer needed
 # Use rspec2 conventions
-Patch103:       passenger_rspec2_helper.patch
+#Patch103:       passenger_rspec2_helper.patch
 
 # Remove checking for fastthread on F17+
-Patch104:       passenger_fixdeps.patch
+Patch104:       rubygem-passenger-4.0.18_remove_fastthread_dep.patch
 
+## We are on passenger 4.x, removing patch
 # Fix gem-requires for ruby2
 # This is a hack until we move to passenger 4.x
 # https://github.com/FooBarWidget/passenger/pull/71
-Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
+#Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
 
+## This is already in passenger 4.0.18
 # Fix for CVE-2013-4136
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 # Note: This is a combination of both
 # https://github.com/phusion/passenger/commit/5483b3292cc2af1c83033eaaadec20dba4dcfd9b
 # https://github.com/phusion/passenger/commit/9dda49f4a3ebe9bafc48da1bd45799f30ce19566
-Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
+#Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
-Patch107:       rubygem-passenger-3.0.21-GLIBC_HAVE_LONG_LONG.patch
+Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
+
+# Until rubygem-bluecloth is in Fedora, don't use it
+Patch201:       rubygem-passenger-4.0.18-correct_docs.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
@@ -179,27 +195,33 @@ rebuilding this package.
 %prep
 %setup -q -n %{gem_name}-release-%{version}
 
-%patch1   -p1 -b .force-native
+#%patch1   -p1 -b .force-native
 %patch2   -p1 -b .include-sys-types
-%patch20  -p1 -b .spawnip
-%patch100 -p0 -b .autofoo
+#%patch3   -p1 -b .nosign
+%patch4   -p1 -b .lindefault
+#%patch20  -p1 -b .spawnip
+%patch100 -p1 -b .autofoo
 %patch102 -p1 -b .threadtest
-%patch103 -p1 -b .rspec2
+#%patch103 -p1 -b .rspec2
 
 # remove fastthread checking
 %if 0%{?fedora} >= 17
 %patch104 -p1 -b .fastthread
 %endif
 
-# fix requires for ruby2
-%if 0%{?fedora} >= 19
-%patch105 -p1 -b .requires
-%endif
-%patch106 -p1 -b .tmpdir
+## fix requires for ruby2
+#%if 0%{?fedora} >= 19
+#%patch105 -p1 -b .requires
+#%endif
+#%patch106 -p1 -b .tmpdir
+
 # fix passenger boost for glibc >= 2.18
 %if 0%{?fedora} >= 20
 %patch107 -p1 -b .glibc-long
 %endif
+
+# Until bluecloth is in Fedora, don't use it
+%patch201 -p1 -b .docs
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
@@ -233,7 +255,8 @@ export USE_VENDORED_LIBEV=false
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ;
-rake package
+
+rake package:gem SKIP_SIGNING=1
 rake apache2
 #rake nginx
 
@@ -251,7 +274,7 @@ gem install -V \
 
 # Install Apache module.
 %{__mkdir_p} %{buildroot}/%{_httpd_moddir}
-install -pm 0755 ext/apache2/mod_passenger.so %{buildroot}/%{_httpd_moddir}
+install -pm 0755 buildout/apache2/mod_passenger.so %{buildroot}/%{_httpd_moddir}
 
 # Install Apache config.
 %{__mkdir_p} %{buildroot}%{_httpd_confdir} %{buildroot}%{_httpd_modconfdir}
@@ -274,9 +297,10 @@ install -pm 0644 passenger.conf %{buildroot}%{_httpd_confdir}/passenger.conf
 rmdir %{buildroot}%{gem_instdir}/man
 
 # The agents aren't in the gem for some reason...
-%{__chmod} -R 0755 agents/*
+%{__chmod} -R 0755 buildout/agents/*
 %{__mkdir_p} %{buildroot}%{gem_extdir}
-%{__cp} -a agents %{buildroot}%{gem_extdir}
+%{__cp} -a buildout/agents %{buildroot}%{gem_extdir}
+%{__rm} -f %{buildroot}%{gem_extdir}/agents/*.o
 
 # Make our ghost log and run directories...
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
@@ -302,10 +326,14 @@ done
 
 # Bring over just the native binaries
 %{__mkdir_p} %{buildroot}%{gem_extdir}/lib/native
-install -m 0755 ext/ruby/ruby*linux/passenger_native_support.so %{buildroot}%{gem_extdir}/lib/native
+install -m 0755 buildout/ruby/ruby*linux/passenger_native_support.so %{buildroot}%{gem_extdir}/lib/native
 
-# Remove zero-length files
+# Remove zero-length and non-needed files
 find %{buildroot}%{gem_instdir} -type f -size 0c -delete
+%{__rm} -rf %{buildroot}%{gem_instdir}/.gitignore
+%{__rm} -rf %{buildroot}%{gem_instdir}/.yardoc
+%{__rm} -rf %{buildroot}%{gem_instdir}/rpm/
+
 
 # Don't install the installation scripts and Rakefile. That's why we have packaging.
 %{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-apache2-module
@@ -328,13 +356,14 @@ sed -i \
     "s|return locate_ruby_tool('spec')|return locate_ruby_tool('rspec')|" \
     lib/phusion_passenger/platform_info/ruby.rb
 
-%{__cp} test/config.yml.example test/config.yml
+%{__cp} test/config.json.example test/config.json
 
 rake test --trace ||:
 
 %files
-%doc %{gem_instdir}/README
-%doc %{gem_instdir}/DEVELOPERS.TXT
+%doc %{gem_instdir}/README.md
+%doc %{gem_instdir}/CONTRIBUTING.md
+%doc %{gem_instdir}/CONTRIBUTORS
 %doc %{gem_instdir}/LICENSE
 %doc %{gem_instdir}/NEWS
 %{gem_cache}
@@ -343,7 +372,9 @@ rake test --trace ||:
 %{gem_instdir}/bin
 %{gem_instdir}/helper-scripts
 %{gem_instdir}/lib
+%{gem_instdir}/passenger.gemspec
 %{gem_instdir}/resources
+%{gem_instdir}/.travis.yml
 %{_bindir}/%{gem_name}*
 %{_mandir}/man1/%{gem_name}-*
 %{_mandir}/man8/%{gem_name}-*
@@ -354,7 +385,7 @@ rake test --trace ||:
 %dir %{_localstatedir}/run/rubygem-passenger
 %endif
 %exclude %{gem_instdir}/configure
-%exclude %{gem_instdir}/debian/
+%exclude %{gem_instdir}/debian.template/
 %exclude %{gem_cache}
 
 %files doc
@@ -362,8 +393,7 @@ rake test --trace ||:
 %doc %{gem_instdir}/doc
 
 %files devel
-%doc %{gem_instdir}/INSTALL
-%doc %{gem_instdir}/PACKAGING.TXT
+%doc %{gem_instdir}/INSTALL.md
 %{gem_instdir}/test
 %{gem_instdir}/build
 %{gem_instdir}/dev
@@ -387,6 +417,11 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Tue Sep 24 2013 Troy Dawson <tdawson@redhat.com> - 4.0.18-1
+- Update to 4.0.18
+- Remove patches no longer needed
+- Update patches that need updating
+
 * Mon Sep 23 2013 Brett Lentz <blentz@redhat.com> - 3.0.21-9
 - finish fixing bz#999384
 
