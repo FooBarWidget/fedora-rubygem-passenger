@@ -29,28 +29,12 @@ Source: https://github.com/FooBarWidget/passenger/archive/release-%{version}.tar
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
 Source10: apache-passenger.conf.in
-#Source20: nginx-passenger.conf.in
-
-## Native support was completely rewritten
-## Patch no longer needed
-# Get passenger to recognize our path preferences
-#Patch1:         rubygem-passenger-3.0.12-force-native.patch
 
 # Include sys/types.h for GCC 4.7
 Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
 
-## Not needed, use SKIP_SIGNING=1 instead
-# Remove signing gems with GPG, requires rubygem-openpgp >= 0.3.0
-#Patch3:        passenger_do_not_sign_gem.patch
-
 # Make example config for tests ready for linux by default
 Patch4:        passenger_tests_default_config_example.patch
-
-#Patch10:        rubygem-passenger-3.0.12-spoof-nginx-install.patch
-
-## SpawnIP was redone on passenger 4
-## Support spawnIpAddress option to allow binding to a particular IP.
-#Patch20:        rubygem-passenger-3.0.12-spawn-ip.patch
 
 # Honor CXXFLAGS in the environment.
 Patch100:       rubygem-passenger-4.0.18_apache_fix_autofoo.patch
@@ -59,26 +43,8 @@ Patch100:       rubygem-passenger-4.0.18_apache_fix_autofoo.patch
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
 Patch102:       passenger_dynamic_thread_group.patch
 
-## No longer needed
-# Use rspec2 conventions
-#Patch103:       passenger_rspec2_helper.patch
-
 # Remove checking for fastthread on F17+
 Patch104:       rubygem-passenger-4.0.18_remove_fastthread_dep.patch
-
-## We are on passenger 4.x, removing patch
-# Fix gem-requires for ruby2
-# This is a hack until we move to passenger 4.x
-# https://github.com/FooBarWidget/passenger/pull/71
-#Patch105:       rubygem-passenger-3.0.19-requires-fix-ruby2.patch
-
-## This is already in passenger 4.0.18
-# Fix for CVE-2013-4136
-# https://bugzilla.redhat.com/show_bug.cgi?id=985634
-# Note: This is a combination of both
-# https://github.com/phusion/passenger/commit/5483b3292cc2af1c83033eaaadec20dba4dcfd9b
-# https://github.com/phusion/passenger/commit/9dda49f4a3ebe9bafc48da1bd45799f30ce19566
-#Patch106:       rubygem-passenger-3.0.21-CVE-2013-4136-tmp-directory.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
@@ -195,25 +161,15 @@ rebuilding this package.
 %prep
 %setup -q -n %{gem_name}-release-%{version}
 
-#%patch1   -p1 -b .force-native
 %patch2   -p1 -b .include-sys-types
-#%patch3   -p1 -b .nosign
 %patch4   -p1 -b .lindefault
-#%patch20  -p1 -b .spawnip
 %patch100 -p1 -b .autofoo
 %patch102 -p1 -b .threadtest
-#%patch103 -p1 -b .rspec2
 
 # remove fastthread checking
 %if 0%{?fedora} >= 17
 %patch104 -p1 -b .fastthread
 %endif
-
-## fix requires for ruby2
-#%if 0%{?fedora} >= 19
-#%patch105 -p1 -b .requires
-#%endif
-#%patch106 -p1 -b .tmpdir
 
 # fix passenger boost for glibc >= 2.18
 %if 0%{?fedora} >= 20
@@ -417,6 +373,10 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Wed Sep 25 2013 Troy Dawson <tdawson@redhat.com> - 4.0.18-2
+- Cleanup spec file
+- Fix for bz#987879
+
 * Tue Sep 24 2013 Troy Dawson <tdawson@redhat.com> - 4.0.18-1
 - Update to 4.0.18
 - Remove patches no longer needed
