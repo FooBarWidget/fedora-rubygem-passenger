@@ -13,7 +13,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 4.0.18
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -29,6 +29,7 @@ Source: https://github.com/FooBarWidget/passenger/archive/release-%{version}.tar
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
 Source10: apache-passenger.conf.in
+Source11: locations.ini
 
 # Include sys/types.h for GCC 4.7
 Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
@@ -228,13 +229,22 @@ gem install -V \
             --rdoc \
             pkg/%{gem_name}-%{version}.gem
 
+# Install locations.ini
+install -pm 0644 %{SOURCE11} %{buildroot}%{gem_instdir}/lib/phusion_passenger/
+%{__sed} -i 's|@BINDIR@|%{_bindir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+%{__sed} -i 's|@GEM_EXTDIR@|%{gem_extdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+%{__sed} -i 's|@GEM_INSTDIR@|%{gem_instdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+%{__sed} -i 's|@GEM_DOCDIR@|%{gem_docdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+%{__sed} -i 's|@HTTPD_MODDIR@|%{_httpd_moddir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+
+
 # Install Apache module.
 %{__mkdir_p} %{buildroot}/%{_httpd_moddir}
 install -pm 0755 buildout/apache2/mod_passenger.so %{buildroot}/%{_httpd_moddir}
 
 # Install Apache config.
 %{__mkdir_p} %{buildroot}%{_httpd_confdir} %{buildroot}%{_httpd_modconfdir}
-%{__sed} -e 's|@PASSENGERROOT@|%{gem_instdir}|g' %{SOURCE10} > passenger.conf
+%{__sed} -e 's|@PASSENGERROOT@|%{gem_instdir}/lib/phusion_passenger/locations.ini|g' %{SOURCE10} > passenger.conf
 
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
 %{__sed} -n /^LoadModule/p passenger.conf > 10-passenger.conf
@@ -373,6 +383,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu Oct 31 2013 Jan Kaluza <jkaluza@redhat.com> - 4.0.18-3
+- fix #1021940 - add locations.ini with proper Fedora locations
+
 * Wed Sep 25 2013 Troy Dawson <tdawson@redhat.com> - 4.0.18-2
 - Cleanup spec file
 - Fix for bz#987879
