@@ -13,7 +13,7 @@
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
 Version: 4.0.18
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -52,6 +52,9 @@ Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 
 # Until rubygem-bluecloth is in Fedora, don't use it
 Patch201:       rubygem-passenger-4.0.18-correct_docs.patch
+
+# Load native library from proper directory
+Patch202:       rubygem-passenger-4.0.18_native_dir.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
@@ -179,6 +182,7 @@ rebuilding this package.
 
 # Until bluecloth is in Fedora, don't use it
 %patch201 -p1 -b .docs
+%patch202 -p1 -b .nativedir
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
@@ -383,6 +387,9 @@ rake test --trace ||:
 %{gem_extdir}/lib
 
 %changelog
+* Thu Nov 14 2013 Jan Kaluza <jkaluza@redhat.com> - 4.0.18-4
+- load native library from proper path
+
 * Thu Oct 31 2013 Jan Kaluza <jkaluza@redhat.com> - 4.0.18-3
 - fix #1021940 - add locations.ini with proper Fedora locations
 
