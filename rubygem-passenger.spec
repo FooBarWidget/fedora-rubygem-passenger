@@ -12,8 +12,8 @@
 
 Summary: Passenger Ruby web application server
 Name: rubygem-%{gem_name}
-Version: 4.0.18
-Release: 4%{?dist}
+Version: 4.0.29
+Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License
@@ -25,7 +25,7 @@ License: Boost and BSD and BSD with advertising and MIT and zlib
 URL: http://www.modrails.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Source: https://github.com/FooBarWidget/passenger/archive/release-%{version}.tar.gz
+Source: http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{version}.tar.gz
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
 Source10: apache-passenger.conf.in
@@ -160,7 +160,7 @@ rebuilding this package.
 
 
 %prep
-%setup -q -n %{gem_name}-release-%{version}
+%setup -q -n %{gem_name}-%{version}
 
 %patch2   -p1 -b .include-sys-types
 %patch4   -p1 -b .lindefault
@@ -209,7 +209,7 @@ CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ;
 
-rake package:gem SKIP_SIGNING=1
+gem build passenger.gemspec
 rake apache2
 #rake nginx
 
@@ -223,7 +223,7 @@ gem install -V \
             --bindir %{buildroot}%{_bindir} \
             --force \
             --rdoc \
-            pkg/%{gem_name}-%{version}.gem
+            %{gem_name}-%{version}.gem
 
 # Install locations.ini
 install -pm 0644 %{SOURCE11} %{buildroot}%{gem_instdir}/lib/phusion_passenger/
@@ -334,6 +334,7 @@ rake test --trace ||:
 %{gem_instdir}/bin
 %{gem_instdir}/helper-scripts
 %{gem_instdir}/lib
+%{gem_instdir}/node_lib
 %{gem_instdir}/passenger.gemspec
 %{gem_instdir}/resources
 %{gem_instdir}/.travis.yml
