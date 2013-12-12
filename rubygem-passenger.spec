@@ -44,9 +44,6 @@ Patch100:       rubygem-passenger-4.0.18_apache_fix_autofoo.patch
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
 Patch102:       passenger_dynamic_thread_group.patch
 
-# Remove checking for fastthread on F17+
-Patch104:       rubygem-passenger-4.0.18_remove_fastthread_dep.patch
-
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 
@@ -169,11 +166,6 @@ rebuilding this package.
 %patch4   -p1 -b .lindefault
 %patch100 -p1 -b .autofoo
 %patch102 -p1 -b .threadtest
-
-# remove fastthread checking
-%if 0%{?fedora} >= 17
-%patch104 -p1 -b .fastthread
-%endif
 
 # fix passenger boost for glibc >= 2.18
 %if 0%{?fedora} >= 20
