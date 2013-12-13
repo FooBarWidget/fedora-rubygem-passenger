@@ -77,8 +77,6 @@ BuildRequires:  rubygem(fastthread) >= 1.0.1
 
 BuildRequires: asciidoc
 BuildRequires: boost-devel
-BuildRequires: doxygen
-BuildRequires: graphviz
 BuildRequires: httpd-devel
 BuildRequires: libev-devel
 BuildRequires: ruby
