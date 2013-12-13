@@ -294,8 +294,9 @@ find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 
 %check
 export USE_VENDORED_LIBEV=false
-# Run the tests, capture the output, but don't fail the build if the tests fail
-#
+# Run the tests, capture the output, but don't fail the build if the tests fail.
+# This is because the tests are very sensitive to timing so it's normal for
+# them to fail sometimes.
 # This will make the test failure non-critical, but it should be examined
 # anyway.
 sed -i 's|sh "cd test && \./cxx/CxxTestMain"|& rescue true|' \
