@@ -37,9 +37,6 @@ Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
 # Make example config for tests ready for linux by default
 Patch4:        passenger_tests_default_config_example.patch
 
-# Honor CXXFLAGS in the environment.
-Patch100:       rubygem-passenger-4.0.18_apache_fix_autofoo.patch
-
 # Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
 Patch102:       passenger_dynamic_thread_group.patch
@@ -156,7 +153,6 @@ rebuilding this package.
 
 %patch2   -p1 -b .include-sys-types
 %patch4   -p1 -b .lindefault
-%patch100 -p1 -b .autofoo
 %patch102 -p1 -b .threadtest
 
 # fix passenger boost for glibc >= 2.18
@@ -192,8 +188,8 @@ done
 
 %build
 export USE_VENDORED_LIBEV=false
-CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
-CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
+export EXTRA_CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
+export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ;
 
 gem build passenger.gemspec
