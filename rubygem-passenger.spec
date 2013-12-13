@@ -219,7 +219,7 @@ gem install -V \
             --install-dir %{buildroot}%{gem_dir} \
             --bindir %{buildroot}%{_bindir} \
             --force \
-            --rdoc \
+            --no-rdoc --no-ri \
             %{gem_name}-%{version}.gem
 
 # Install locations.ini
@@ -227,7 +227,7 @@ install -pm 0644 %{SOURCE11} %{buildroot}%{gem_instdir}/lib/phusion_passenger/
 %{__sed} -i 's|@BINDIR@|%{_bindir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
 %{__sed} -i 's|@GEM_EXTDIR@|%{gem_extdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
 %{__sed} -i 's|@GEM_INSTDIR@|%{gem_instdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-%{__sed} -i 's|@GEM_DOCDIR@|%{gem_docdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
+%{__sed} -i 's|@GEM_DOCDIR@|%{gem_instdir}/doc|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
 %{__sed} -i 's|@HTTPD_MODDIR@|%{_httpd_moddir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
 
 
@@ -278,11 +278,6 @@ install -d -m 0755 %{buildroot}/run/%{name}
 %{__mkdir_p} %{buildroot}%{_localstatedir}/run/%{name}
 %endif
 
-# Fix wrong EOF encoding on the RI files...
-for file in `find %{buildroot}%{gem_docdir} -type f -name "*.ri"`; do
-    sed -i 's/\r//' $file
-done
-
 # Bring over just the native binaries
 %{__mkdir_p} %{buildroot}%{gem_extdir}/lib/native
 install -m 0755 buildout/ruby/ruby*linux/passenger_native_support.so %{buildroot}%{gem_extdir}/lib/native
@@ -290,7 +285,6 @@ install -m 0755 buildout/ruby/ruby*linux/passenger_native_support.so %{buildroot
 # Remove zero-length and non-needed files
 find %{buildroot}%{gem_instdir} -type f -size 0c -delete
 %{__rm} -rf %{buildroot}%{gem_instdir}/.gitignore
-%{__rm} -rf %{buildroot}%{gem_instdir}/.yardoc
 %{__rm} -rf %{buildroot}%{gem_instdir}/rpm/
 
 
@@ -345,7 +339,6 @@ rake test --trace ||:
 %exclude %{gem_cache}
 
 %files doc
-%doc %{gem_docdir}
 %doc %{gem_instdir}/doc
 
 %files devel
