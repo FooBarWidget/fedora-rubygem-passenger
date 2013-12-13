@@ -300,11 +300,6 @@ export USE_VENDORED_LIBEV=false
 sed -i 's|sh "cd test && \./cxx/CxxTestMain"|& rescue true|' \
     build/cxx_tests.rb
 
-# Fedora has RSpec 2 while the test suite seems to require RSpec 1.
-sed -i \
-    "s|return locate_ruby_tool('spec')|return locate_ruby_tool('rspec')|" \
-    lib/phusion_passenger/platform_info/ruby.rb
-
 %{__cp} test/config.json.example test/config.json
 
 rake test --trace ||:
