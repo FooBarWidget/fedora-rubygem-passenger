@@ -73,7 +73,7 @@ BuildRequires:  rubygem(fastthread) >= 1.0.1
 %endif
 
 BuildRequires: httpd-devel
-BuildRequires: libev-devel
+BuildRequires: libev-devel >= 4.0.0
 BuildRequires: ruby
 BuildRequires: ruby-devel
 BuildRequires: rubygems
