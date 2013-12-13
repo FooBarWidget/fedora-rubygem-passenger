@@ -67,7 +67,7 @@ BuildRequires:  libcurl-devel
 BuildRequires:  curl-devel
 %endif
 
-%if 0%{?rhel} <= 6 && 0%{?fedora} <= 16
+%if 0%{?rhel} < 6 && 0%{?fedora} <= 16
 Requires: rubygem(fastthread) >= 1.0.1
 BuildRequires:  rubygem(fastthread) >= 1.0.1
 %endif
