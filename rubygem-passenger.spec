@@ -47,9 +47,6 @@ Patch102:       passenger_dynamic_thread_group.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 
-# Until rubygem-bluecloth is in Fedora, don't use it
-Patch201:       rubygem-passenger-4.0.18-correct_docs.patch
-
 # Load native library from proper directory
 Patch202:       rubygem-passenger-4.0.18_native_dir.patch
 
@@ -75,7 +72,6 @@ Requires: rubygem(fastthread) >= 1.0.1
 BuildRequires:  rubygem(fastthread) >= 1.0.1
 %endif
 
-BuildRequires: asciidoc
 BuildRequires: boost-devel
 BuildRequires: httpd-devel
 BuildRequires: libev-devel
@@ -87,7 +83,6 @@ BuildRequires: rubygem(rake) >= 0.8.1
 BuildRequires: rubygem(rack)
 BuildRequires: rubygem(rspec)
 BuildRequires: rubygem(mime-types)
-BuildRequires: source-highlight
 
 # XXX
 BuildRequires: zlib-devel
@@ -170,15 +165,10 @@ rebuilding this package.
 %patch107 -p1 -b .glibc-long
 %endif
 
-# Until bluecloth is in Fedora, don't use it
-%patch201 -p1 -b .docs
 %patch202 -p1 -b .nativedir
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
-
-# asciidoc 8.4.x doesn't have an html5 backend
-%{__sed} -i 's/-b html5/-b html4/' build/documentation.rb
 
 # fix up install paths
 %{__sed} -i \
