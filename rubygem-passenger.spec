@@ -1,8 +1,17 @@
 %global gem_name passenger
 
+%if 0%{?fc18}
+%global rubyabi 1.9.1
+%endif
+
+%if 0%{?el6}
+%global rubyabi 1.8
+%endif
+
 %if 0%{?fedora} >= 19
 %global gem_extdir %{gem_extdir_mri}
 %endif
+%{!?gem_extdir: %global gem_extdir %{gem_instdir}/extdir}
 
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo missing-httpd-devel)}}
 %{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
@@ -58,7 +67,7 @@ Requires: rubygem(rake)
 %if 0%{?fedora} >= 19
 Requires: ruby(release)
 %else
-Requires: ruby(abi) = 1.9.1
+Requires: ruby(abi) = %{rubyabi}
 %endif
 
 %if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
