@@ -47,6 +47,9 @@ Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 # Load native library from proper directory
 Patch202:       rubygem-passenger-4.0.18_native_dir.patch
 
+Patch203:       rubygem-passenger-4.0.29_fixwarnings.patch
+Patch204:       rubygem-passenger-4.0.29_fixopen.patch
+
 Requires: rubygems
 # XXX: Needed to run passenger standalone
 Requires: rubygem(daemon_controller) >= 1.0.0
@@ -161,6 +164,8 @@ rebuilding this package.
 %endif
 
 %patch202 -p1 -b .nativedir
+%patch203 -p1 -b .fixwarnings
+%patch204 -p1 -b .fixopen
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
