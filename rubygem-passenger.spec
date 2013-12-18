@@ -31,7 +31,7 @@ Group: System Environment/Daemons
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=470696#c146
 License: Boost and BSD and BSD with advertising and MIT and zlib
 
-URL: http://www.modrails.com
+URL: https://www.phusionpassenger.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Source: http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{version}.tar.gz
