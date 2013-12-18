@@ -58,6 +58,7 @@ Patch202:       rubygem-passenger-4.0.18_native_dir.patch
 
 Patch203:       rubygem-passenger-4.0.29_fixwarnings.patch
 Patch204:       rubygem-passenger-4.0.29_fixopen.patch
+Patch205:       rubygem-passenger-4.0.29_filter_support_aliasing.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
@@ -175,6 +176,7 @@ rebuilding this package.
 %patch202 -p1 -b .nativedir
 %patch203 -p1 -b .fixwarnings
 %patch204 -p1 -b .fixopen
+%patch205 -p1 -b .filter_support_aliasing
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
