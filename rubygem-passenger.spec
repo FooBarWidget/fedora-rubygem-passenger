@@ -1,4 +1,7 @@
-%global gem_name passenger
+%global package_name passenger
+%global namespace passenger
+%global nginx_version 1.4.4
+%global bundled_boost_version 1.54.0
 
 %if 0%{?fc18}
 %global rubyabi 1.9.1
@@ -19,9 +22,17 @@
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 %{!?_httpd_moddir:    %{expand: %%global _httpd_moddir    %%{_libdir}/httpd/modules}}
 
-Summary: Passenger Ruby web application server
-Name: rubygem-%{gem_name}
-Version: 4.0.29
+%global ruby_dir_version %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]')
+%global ruby_arch_name %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["arch"]')
+%{!?ruby_sitelibdir: %global ruby_sitelibdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["sitelibdir"]')}
+%{!?ruby_sitearchdir: %global ruby_sitearchdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["sitearchdir"]')}
+%global passenger_ruby_libdir %{ruby_sitelibdir}
+%global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
+
+
+Summary: Phusion Passenger application server
+Name: %{package_name}
+Version: 4.0.33
 Release: 1%{?dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -30,21 +41,20 @@ Group: System Environment/Daemons
 # Documentation is CC-BY-SA
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=470696#c146
 License: Boost and BSD and BSD with advertising and MIT and zlib
-
 URL: https://www.phusionpassenger.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Source: http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{version}.tar.gz
-Source1: passenger.logrotate
-Source2: rubygem-passenger.tmpfiles
-Source10: apache-passenger.conf.in
-Source11: locations.ini
+Source1: http://nginx.org/download/nginx-%{nginx_version}.tar.gz
+Source10: passenger.logrotate
+Source11: apache-passenger.conf.in
+Source12: config.json
 
 # Include sys/types.h for GCC 4.7
 Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
 
 # Make example config for tests ready for linux by default
-Patch4:        passenger_tests_default_config_example.patch
+Patch4:         passenger_tests_default_config_example.patch
 
 # Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
@@ -52,13 +62,6 @@ Patch102:       passenger_dynamic_thread_group.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
-
-# Load native library from proper directory
-Patch202:       rubygem-passenger-4.0.18_native_dir.patch
-
-Patch203:       rubygem-passenger-4.0.29_fixwarnings.patch
-Patch204:       rubygem-passenger-4.0.29_fixopen.patch
-Patch205:       rubygem-passenger-4.0.29_filter_support_aliasing.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
@@ -92,77 +95,73 @@ BuildRequires: rubygem(rake) >= 0.8.1
 BuildRequires: rubygem(rack)
 BuildRequires: rubygem(rspec)
 BuildRequires: rubygem(mime-types)
-
-# XXX
 BuildRequires: zlib-devel
+BuildRequires: pcre-devel
+BuildRequires: openssl-devel
 
-Provides: rubygem(%{gem_name}) = %{version}-%{release}
-Provides: bundled(boost) =  1.54.0
+Provides: %{package_name} = %{version}-%{release}
+Provides: bundled(boost)  = %{bundled_boost_version}
+Obsoletes: rubygem(passenger)
+Obsoletes: rubygem-passenger
+Obsoletes: rubygem-passenger-native
 
 %description
-Phusion Passenger™ — a.k.a. mod_rails or mod_rack — makes deployment
-of Ruby web applications, such as those built on the revolutionary
-Ruby on Rails web framework, a breeze. It follows the usual Ruby on
-Rails conventions, such as “Don’t-Repeat-Yourself”.
+Phusion Passenger® is a web server and application server, designed to be fast, robust
+and lightweight. It takes a lot of complexity out of deploying web apps, adds powerful
+enterprise-grade features that are useful in production, and makes administration much
+easier and less complex. It supports Ruby, Python, Node.js and Meteor.
 
 %package -n mod_passenger
 Summary: Apache Module for Phusion Passenger
 Group: System Environment/Daemons
 BuildRequires:  httpd-devel
 Requires: httpd-mmn = %{_httpd_mmn}
-Requires: rubygem(%{gem_name}) = %{version}-%{release}
-Requires: %{name}-native%{?_isa} = %{version}-%{release}
+Requires: %{package_name} = %{version}-%{release}
 License: Boost and BSD and BSD with advertising and MIT and zlib
 
 %description -n mod_passenger
-This package contains the pluggable Apache server module for Phusion Passenger™.
+This package contains the pluggable Apache server module for Phusion Passenger®.
 
 %package devel
-Summary: Apache Module for Phusion Passenger
+Summary: Phusion Passenger development files
 Group: System Environment/Daemons
-Requires: rubygem(%{gem_name}) = %{version}-%{release}
-Provides: bundled(boost-devel) =  1.54.0
+Requires: %{package_name}%{?_isa} = %{version}-%{release}
+Provides: bundled(boost-devel) = %{bundled_boost_version}
+Obsoletes: rubygem-passenger-devel
 License: Boost and BSD and BSD with advertising and GPL+ and MIT and zlib
 
 %description devel
-This package contains development files for Phusion Passenger™.
+This package contains development files for Phusion Passenger®. Installing this
+package allows it to compile native extensions for non-standard Ruby interpreters,
+and allows Passenger Standalone to use a different Nginx core version.
 
 %package doc
-Summary: Apache Module for Phusion Passenger
+Summary: Phusion Passenger documentation
 Group: System Environment/Daemons
-Requires: rubygem(%{gem_name}) = %{version}-%{release}
+Requires: %{package_name} = %{version}-%{release}
+Obsoletes: rubygem-passenger-doc
 BuildArch: noarch
 License: CC-BY-SA and MIT and (MIT or GPL+)
 
 %description doc
-This package contains documentation files for Phusion Passenger™.
-
-%package native
-Summary: Phusion Passenger native extensions
-Group: System Environment/Daemons
-Requires: rubygem(%{gem_name}) = %{version}-%{release}
-Requires: %{name}-native-libs%{?_isa} = %{version}-%{release}
-Requires: %{name}%{?_isa} = %{version}-%{release}
-License: Boost and BSD and BSD with advertising and MIT and zlib
-%description native
-This package contains the native code extensions for Apache & Nginx
-Phusion Passenger™ bindings.
+This package contains documentation files for Phusion Passenger®.
 
 %package native-libs
 Summary: Phusion Passenger native extensions
 Group: System Environment/Daemons
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Requires: ruby
+Obsoletes: rubygem-passenger-native-libs
 License: Boost and BSD and BSD with advertising and MIT and zlib
 %description native-libs
-This package contains the native shared library for Apache & Nginx
-Phusion Passenger™ bindings, built against ruby sources. It has been
-separated so that installing a new ruby interpreter only necessitates
-rebuilding this package.
+This package contains Phusion Passenger® native extensions for Ruby.
+It has been separated so that installing a new Ruby interpreter only
+necessitates rebuilding this package.
 
 
 %prep
-%setup -q -n %{gem_name}-%{version}
+%setup -q -n %{package_name}-%{version}
+tar xzf %{SOURCE1}
 
 %patch2   -p1 -b .include-sys-types
 %patch4   -p1 -b .lindefault
@@ -170,191 +169,147 @@ rebuilding this package.
 
 # fix passenger boost for glibc >= 2.18
 %if 0%{?fedora} >= 20
-%patch107 -p1 -b .glibc-long
+    %patch107 -p1 -b .glibc-long
 %endif
-
-%patch202 -p1 -b .nativedir
-%patch203 -p1 -b .fixwarnings
-%patch204 -p1 -b .fixopen
-%patch205 -p1 -b .filter_support_aliasing
 
 # Don't use bundled libev
 %{__rm} -rf ext/libev
 
-# fix up install paths
-%{__sed} -i \
-    -e 's|%%%%GEM_INSTALL_DIR%%%%|%{gem_instdir}|g' \
-    -e 's|%%%%APACHE_INSTALLED_MOD%%%%|%{_httpd_moddir}|g' \
-    -e 's|%%%%AGENTS_DIR%%%%|%{gem_extdir}/agents|g' \
-    -e 's|%%%%NATIVE_SUPPORT_DIR%%%%|%{gem_extdir}/lib|g' \
-    lib/phusion_passenger.rb \
-    lib/phusion_passenger/native_support.rb \
-    ext/common/ResourceLocator.h
-
 %build
-export USE_VENDORED_LIBEV=false
-export EXTRA_CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
-export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
-FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ;
+export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
+export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
 
-gem build passenger.gemspec
-rake apache2
-#rake nginx
+# Reduce optimization level. Passenger has not been tested with -O2.
+export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2|-O|g'`
+export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2|-O|g'`
+
+export USE_VENDORED_LIBEV=false
+
+# Speed up ccache (reduce I/O) by lightly compressing things.
+# Always set these variables because pbuilder uses ccache transparently.
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+
+# Build Passenger.
+rake fakeroot \
+    NATIVE_PACKAGING_METHOD=rpm \
+    FS_PREFIX=%{_prefix} \
+    FS_BINDIR=%{_bindir} \
+    FS_SBINDIR=%{_sbindir} \
+    FS_DATADIR=%{_datadir} \
+    FS_DOCDIR=%{_docdir} \
+    FS_LIBDIR=%{_libdir} \
+    RUBYLIBDIR=%{ruby_sitelibdir} \
+    RUBYARCHDIR=%{ruby_sitearchdir} \
+    APACHE2_MODULE_PATH=%{_httpd_moddir}/mod_passenger.so
+
+# Build Nginx core for Passenger Standalone.
+nginx_config_opts=`ruby -Ilib -rphusion_passenger -rphusion_passenger/constants -e 'puts PhusionPassenger::STANDALONE_NGINX_CONFIGURE_OPTIONS'`
+#nginx_config_opts=`ruby -Ilib -rphusion_passenger -e 'PhusionPassenger.locate_directories; PhusionPassenger.require_passenger_lib "constants"; puts PhusionPassenger::STANDALONE_NGINX_CONFIGURE_OPTIONS'`
+pushd nginx-%{nginx_version}
+./configure --prefix=/tmp $nginx_config_opts --add-module=`pwd`/../ext/nginx
+make
+popd
+
 
 %install
-export USE_VENDORED_LIBEV=false
+%{__rm} -rf %{buildroot}
+%{__mkdir} %{buildroot}
+%{__cp} -a pkg/fakeroot/* %{buildroot}/
+%{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/PassengerWebHelper
 
-# Install the gem.
-gem install -V \
-            --local \
-            --install-dir %{buildroot}%{gem_dir} \
-            --bindir %{buildroot}%{_bindir} \
-            --force \
-            --no-rdoc --no-ri \
-            %{gem_name}-%{version}.gem
-
-# Install locations.ini
-install -pm 0644 %{SOURCE11} %{buildroot}%{gem_instdir}/lib/phusion_passenger/
-%{__sed} -i 's|@BINDIR@|%{_bindir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-%{__sed} -i 's|@GEM_EXTDIR@|%{gem_extdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-%{__sed} -i 's|@GEM_INSTDIR@|%{gem_instdir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-%{__sed} -i 's|@GEM_DOCDIR@|%{gem_instdir}/doc|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-%{__sed} -i 's|@HTTPD_MODDIR@|%{_httpd_moddir}|' %{buildroot}%{gem_instdir}/lib/phusion_passenger/locations.ini
-
-
-# Install Apache module.
-%{__mkdir_p} %{buildroot}/%{_httpd_moddir}
-install -pm 0755 buildout/apache2/mod_passenger.so %{buildroot}/%{_httpd_moddir}
+# Install bootstrapping code into the executables and the Nginx config script.
+./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
+./dev/install_scripts_bootstrap_code.rb --nginx-module-config %{_bindir} %{buildroot}%{_datadir}/%{namespace}/ngx_http_passenger_module/config
 
 # Install Apache config.
 %{__mkdir_p} %{buildroot}%{_httpd_confdir} %{buildroot}%{_httpd_modconfdir}
-%{__sed} -e 's|@PASSENGERROOT@|%{gem_instdir}/lib/phusion_passenger/locations.ini|g' %{SOURCE10} > passenger.conf
+%{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE11} > passenger.conf
 
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
-%{__sed} -n /^LoadModule/p passenger.conf > 10-passenger.conf
-%{__sed} -i /^LoadModule/d passenger.conf
-touch -r %{SOURCE10} 10-passenger.conf
-install -pm 0644 10-passenger.conf %{buildroot}%{_httpd_modconfdir}/passenger.conf
+    %{__sed} -n /^LoadModule/p passenger.conf > 10-passenger.conf
+    %{__sed} -i /^LoadModule/d passenger.conf
+    touch -r %{SOURCE11} 10-passenger.conf
+    install -pm 0644 10-passenger.conf %{buildroot}%{_httpd_modconfdir}/passenger.conf
 %endif
-touch -r %{SOURCE10} passenger.conf
+touch -r %{SOURCE11} passenger.conf
 install -pm 0644 passenger.conf %{buildroot}%{_httpd_confdir}/passenger.conf
 
 # Install man pages into the proper location.
 %{__mkdir_p} %{buildroot}%{_mandir}/man1
 %{__mkdir_p} %{buildroot}%{_mandir}/man8
-%{__mv} %{buildroot}%{gem_instdir}/man/*.1 %{buildroot}%{_mandir}/man1
-%{__mv} %{buildroot}%{gem_instdir}/man/*.8 %{buildroot}%{_mandir}/man8
-rmdir %{buildroot}%{gem_instdir}/man
-
-# The agents aren't in the gem for some reason...
-%{__chmod} -R 0755 buildout/agents/*
-%{__mkdir_p} %{buildroot}%{gem_extdir}
-%{__cp} -a buildout/agents %{buildroot}%{gem_extdir}
-%{__rm} -f %{buildroot}%{gem_extdir}/agents/*.o
+%{__cp} man/*.1 %{buildroot}%{_mandir}/man1
+%{__cp} man/*.8 %{buildroot}%{_mandir}/man8
 
 # Make our ghost log and run directories...
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
 
 # logrotate
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/logrotate.d
-install -pm 0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/passenger
+install -pm 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/logrotate.d/passenger
 
-# tmpfiles.d
-%if 0%{?fedora} > 15
-%{__mkdir_p} %{buildroot}/run
-%{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d
-install -m 0644 %{SOURCE2} %{buildroot}%{_prefix}/lib/tmpfiles.d/%{name}.conf
-install -d -m 0755 %{buildroot}/run/%{name}
-%else
-%{__mkdir_p} %{buildroot}%{_localstatedir}/run/%{name}
-%endif
-
-# Bring over just the native binaries
-%{__mkdir_p} %{buildroot}%{gem_extdir}/lib/native
-install -m 0755 buildout/ruby/ruby*linux/passenger_native_support.so %{buildroot}%{gem_extdir}/lib/native
-
-# Remove zero-length and non-needed files
-find %{buildroot}%{gem_instdir} -type f -size 0c -delete
-%{__rm} -rf %{buildroot}%{gem_instdir}/.gitignore
-%{__rm} -rf %{buildroot}%{gem_instdir}/rpm/
-
-
-# Don't install the installation scripts and Rakefile. That's why we have packaging.
-%{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-apache2-module
-%{__rm} %{buildroot}%{gem_instdir}/bin/%{gem_name}-install-nginx-module
-%{__rm} %{buildroot}%{_bindir}/%{gem_name}-install-apache2-module
-%{__rm} %{buildroot}%{_bindir}/%{gem_name}-install-nginx-module
-%{__rm} %{buildroot}%{gem_instdir}/Rakefile
 
 %check
+export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
+export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
+export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
+export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
 export USE_VENDORED_LIBEV=false
-# Run the tests, capture the output, but don't fail the build if the tests fail.
-# This is because the tests are very sensitive to timing so it's normal for
-# them to fail sometimes.
-# This will make the test failure non-critical, but it should be examined
-# anyway.
-sed -i 's|sh "cd test && \./cxx/CxxTestMain"|& rescue true|' \
-    build/cxx_tests.rb
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
 
-%{__cp} test/config.json.example test/config.json
-
-rake test --trace ||:
+# Running the full test suite is not only slow, but also impossible
+# because not all requirements are packaged by Fedora. It's also not
+# too useful because Phusion Passenger is automatically tested by a CI
+# server on every commit. The C++ tests are the most likely to catch
+# any platform-specific bugs (e.g. bugs caused by wrong compiler options)
+# so we only run those. Note that the C++ tests are highly timing
+# sensitive, so sometimes they may fail even though nothing is really
+# wrong. We therefore do not make failures fatal, although the result
+# should still be checked.
+%{__cp} %{SOURCE12} test/config.json
+rake test:cxx || true
 
 %files
-%doc %{gem_instdir}/README.md
-%doc %{gem_instdir}/CONTRIBUTING.md
-%doc %{gem_instdir}/CONTRIBUTORS
-%doc %{gem_instdir}/LICENSE
-%doc %{gem_instdir}/NEWS
-%{gem_cache}
-%{gem_spec}
-%dir %{gem_instdir}
-%{gem_instdir}/bin
-%{gem_instdir}/helper-scripts
-%{gem_instdir}/lib
-%{gem_instdir}/node_lib
-%{gem_instdir}/passenger.gemspec
-%{gem_instdir}/resources
-%{gem_instdir}/.travis.yml
-%{_bindir}/%{gem_name}*
-%{_mandir}/man1/%{gem_name}-*
-%{_mandir}/man8/%{gem_name}-*
-%if 0%{?fedora} > 15
-%{_prefix}/lib/tmpfiles.d/%{name}.conf
-%dir /run/rubygem-passenger
-%else
-%dir %{_localstatedir}/run/rubygem-passenger
-%endif
-%exclude %{gem_instdir}/configure
-%exclude %{gem_instdir}/debian.template/
-%exclude %{gem_cache}
+%doc "%{_docdir}/%{namespace}/Users guide.html"
+%doc "%{_docdir}/%{namespace}/Users guide Nginx.html"
+%doc "%{_docdir}/%{namespace}/Users guide Apache.html"
+%doc "%{_docdir}/%{namespace}/Users guide Standalone.html"
+%{_bindir}
+%{_sbindir}
+%{_libdir}/%{namespace}/PassengerWebHelper
+%{_libdir}/%{namespace}/agents
+%{_datadir}/%{namespace}/helper-scripts
+%{_datadir}/%{namespace}/templates
+%{_datadir}/%{namespace}/standalone_default_root
+%{_datadir}/%{namespace}/node
+%{_datadir}/%{namespace}/*.types
+%{_datadir}/%{namespace}/*.crt
+%{_datadir}/%{namespace}/*.txt
+%dir %{_localstatedir}/log/passenger-analytics
+%{_sysconfdir}/logrotate.d/passenger
+%{_mandir}
+%{passenger_ruby_libdir}
 
 %files doc
-%doc %{gem_instdir}/doc
+%doc %{_docdir}/%{namespace}
 
 %files devel
-%doc %{gem_instdir}/INSTALL.md
-%{gem_instdir}/test
-%{gem_instdir}/build
-%{gem_instdir}/dev
-%{gem_instdir}/ext
+%{_datadir}/%{namespace}/ngx_http_passenger_module
+%{_datadir}/%{namespace}/ruby_extension_source
+%{_datadir}/%{namespace}/include
+%{_libdir}/%{namespace}/common
 
 %files -n mod_passenger
 %config(noreplace) %{_httpd_modconfdir}/*.conf
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
-%config(noreplace) %{_httpd_confdir}/*.conf
+    %config(noreplace) %{_httpd_confdir}/*.conf
 %endif
-%doc doc/Users?guide?Apache.txt
+%doc "%{_docdir}/%{namespace}/Users guide Apache.html"
 %{_httpd_moddir}/mod_passenger.so
 
-%files native
-%{gem_extdir}/agents
-%dir %{_localstatedir}/log/passenger-analytics
-%{_sysconfdir}/logrotate.d/passenger
-
 %files native-libs
-%dir %{gem_extdir}
-%{gem_extdir}/lib
+%{ruby_sitearchdir}/passenger_native_support.so
 
 %changelog
 * Thu Nov 14 2013 Jan Kaluza <jkaluza@redhat.com> - 4.0.18-4
