@@ -61,7 +61,7 @@ Patch204:       rubygem-passenger-4.0.29_fixopen.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
-Requires: rubygem(daemon_controller) >= 1.0.0
+Requires: rubygem(daemon_controller) >= 1.1.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
 %if 0%{?fedora} >= 19
