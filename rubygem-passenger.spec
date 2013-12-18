@@ -96,7 +96,7 @@ BuildRequires: rubygem(mime-types)
 BuildRequires: zlib-devel
 
 Provides: rubygem(%{gem_name}) = %{version}-%{release}
-Provides: bundled(boost) =  1.44
+Provides: bundled(boost) =  1.54.0
 
 %description
 Phusion Passenger™ — a.k.a. mod_rails or mod_rack — makes deployment
@@ -120,7 +120,7 @@ This package contains the pluggable Apache server module for Phusion Passenger�
 Summary: Apache Module for Phusion Passenger
 Group: System Environment/Daemons
 Requires: rubygem(%{gem_name}) = %{version}-%{release}
-Provides: bundled(boost-devel) =  1.44
+Provides: bundled(boost-devel) =  1.54.0
 License: Boost and BSD and BSD with advertising and GPL+ and MIT and zlib
 
 %description devel
