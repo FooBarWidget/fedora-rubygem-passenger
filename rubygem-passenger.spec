@@ -189,17 +189,6 @@ rebuilding this package.
     lib/phusion_passenger/native_support.rb \
     ext/common/ResourceLocator.h
 
-# Fix anything executable that does not have a hash-bang
-# Why are there executable header files? WTF.
-for script in `find . -type f -perm /a+x -name "*.rb" -o -perm /a+x -name "*.h"`; do
-    [ -z "`head -n 1 $script | grep \"^#!/\"`" ] && chmod -v 644 $script
-done
-
-# Find files with a hash-bang that do not have executable permissions
-for script in `find . -type f ! -perm /a+x -name "*.rb"`; do
-    [ ! -z "`head -n 1 $script | grep \"^#!/\"`" ] && chmod -v 755 $script
-done
-
 %build
 export USE_VENDORED_LIBEV=false
 export EXTRA_CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
