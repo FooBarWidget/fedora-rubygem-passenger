@@ -101,9 +101,11 @@ BuildRequires: openssl-devel
 
 Provides: %{package_name} = %{version}-%{release}
 Provides: bundled(boost)  = %{bundled_boost_version}
-Obsoletes: rubygem(passenger)
-Obsoletes: rubygem-passenger
-Obsoletes: rubygem-passenger-native
+Obsoletes: rubygem(passenger) < 4.0.33
+Obsoletes: rubygem-passenger < 4.0.33
+Obsoletes: rubygem-passenger%{_isa} < 4.0.33
+Obsoletes: rubygem-passenger-native < 4.0.33
+Obsoletes: rubygem-passenger-native%{?_isa} < 4.0.33
 
 %description
 Phusion Passenger® is a web server and application server, designed to be fast, robust
@@ -127,7 +129,8 @@ Summary: Phusion Passenger development files
 Group: System Environment/Daemons
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Provides: bundled(boost-devel) = %{bundled_boost_version}
-Obsoletes: rubygem-passenger-devel
+Obsoletes: rubygem-passenger-devel < 4.0.33
+Obsoletes: rubygem-passenger-devel%{?_isa} < 4.0.33
 License: Boost and BSD and BSD with advertising and GPL+ and MIT and zlib
 
 %description devel
@@ -139,7 +142,7 @@ and allows Passenger Standalone to use a different Nginx core version.
 Summary: Phusion Passenger documentation
 Group: System Environment/Daemons
 Requires: %{package_name} = %{version}-%{release}
-Obsoletes: rubygem-passenger-doc
+Obsoletes: rubygem-passenger-doc < 4.0.33
 BuildArch: noarch
 License: CC-BY-SA and MIT and (MIT or GPL+)
 
@@ -151,7 +154,8 @@ Summary: Phusion Passenger native extensions
 Group: System Environment/Daemons
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Requires: ruby
-Obsoletes: rubygem-passenger-native-libs
+Obsoletes: rubygem-passenger-native-libs < 4.0.33
+Obsoletes: rubygem-passenger-native-libs%{?_isa} < 4.0.33
 License: Boost and BSD and BSD with advertising and MIT and zlib
 %description native-libs
 This package contains Phusion Passenger® native extensions for Ruby.
