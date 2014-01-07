@@ -1,8 +1,12 @@
+### Begin automatically installed Phusion Passenger load snippet ###
 LoadModule passenger_module modules/mod_passenger.so
+### End automatically installed Phusion Passenger load snippet ###
+### Begin automatically installed Phusion Passenger config snippet ###
 <IfModule mod_passenger.c>
    PassengerRoot @PASSENGERROOT@
    PassengerRuby /usr/bin/ruby
 </IfModule>
+### End automatically installed Phusion Passenger config snippet ###
 
 # Deploying a web application: an example
 
